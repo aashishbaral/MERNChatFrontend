@@ -1,8 +1,9 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, Dispatch } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
 import toast from "react-hot-toast";
 import { API } from "../http/http";
 import { Status } from "../types/globalTypes";
+import { RootState } from "./store";
 
 export type Conversation = {
   _id: string;
@@ -25,6 +26,7 @@ interface ConversationState {
   conversationStatus: Status;
   conversationUsers: ConversationUser[];
   conversationUserStatus: Status;
+  messageStatus: Status;
 }
 
 const initialState: ConversationState = {
@@ -34,6 +36,7 @@ const initialState: ConversationState = {
   conversationStatus: Status.IDLE,
   conversationUsers: [],
   conversationUserStatus: Status.IDLE,
+  messageStatus: Status.IDLE,
 };
 
 const conversationSlice = createSlice({
@@ -58,6 +61,9 @@ const conversationSlice = createSlice({
     setConversationUserStatus(state, action) {
       state.conversationStatus = action.payload;
     },
+    setMessageStatus(state, action) {
+      state.messageStatus = action.payload;
+    },
   },
 });
 
@@ -67,12 +73,13 @@ export const {
   setConversationUserStatus,
   setConversationUsers,
   setMessages,
+  setMessageStatus,
   setConversationStatus,
 } = conversationSlice.actions;
 export default conversationSlice.reducer;
 
 export const fetchConversationUsers = () => {
-  return async (dispatch: any) => {
+  return async (dispatch: Dispatch) => {
     dispatch(setConversationUserStatus(Status.LOADING));
     try {
       const { data } = await API.get("users");
@@ -85,6 +92,50 @@ export const fetchConversationUsers = () => {
       toast.error(errorMessage);
     } finally {
       // dispatch(setConversationUserStatus(Status.IDLE));
+    }
+  };
+};
+
+export const fetchMessages = () => {
+  return async (dispatch: Dispatch, getState: () => RootState) => {
+    dispatch(setConversationStatus(Status.LOADING));
+    const { selectedConversation } = getState().conversation;
+    try {
+      if (!selectedConversation?._id) return;
+      const { data } = await API.get(`message/${selectedConversation._id}`);
+      dispatch(setMessages(data.data));
+    } catch (error) {
+      const errorMessage =
+        error instanceof AxiosError && error.response?.data?.message
+          ? error.response.data.message
+          : "An error occurred. Please try again later.";
+      toast.error(errorMessage);
+    } finally {
+      dispatch(setConversationStatus(Status.IDLE));
+    }
+  };
+};
+
+export const sendMessage = (message: string) => {
+  return async (dispatch: Dispatch, getState: () => RootState) => {
+    dispatch(setMessageStatus(Status.LOADING));
+    const { selectedConversation, messages } = getState().conversation;
+    try {
+      const { data } = await API.post(
+        `message/send/${selectedConversation?._id}`,
+        {
+          message,
+        }
+      );
+      dispatch(setMessages([...messages, data.data]));
+    } catch (error) {
+      const errorMessage =
+        error instanceof AxiosError && error.response?.data?.message
+          ? error.response.data.message
+          : "An error occurred. Please try again later.";
+      toast.error(errorMessage);
+    } finally {
+      dispatch(setMessageStatus(Status.IDLE));
     }
   };
 };
