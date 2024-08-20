@@ -1,22 +1,43 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import z from "zod";
+import DottedButton from "../../components/DottedButton";
 import InputWithLabel from "../../components/InputLabel";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import TextInput from "../../components/TextInput";
+import { useLogin } from "../../hooks/useLogin";
 
-const SignUpSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
+export const LoginSchema = z.object({
+  email: z.string().email({ message: "Invalid email" }),
+  password: z.string().min(1, { message: "Password is required" }),
 });
 
 const Login = () => {
-  const { handleSubmit, control } = useForm<z.infer<typeof SignUpSchema>>({
-    resolver: zodResolver(SignUpSchema),
+  const {
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors },
+  } = useForm<z.infer<typeof LoginSchema>>({
+    resolver: zodResolver(LoginSchema),
     mode: "all",
   });
 
-  const onSubmit = (data: z.infer<typeof SignUpSchema>) => {
-    console.log(data);
+  const { login, loading } = useLogin();
+
+  const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
+    const success = await login(data);
+
+    if (success) {
+      reset();
+    }
+  };
+
+  const navigate = useNavigate();
+
+  const handleNavigateSignup = () => {
+    navigate("/sign-up");
   };
 
   return (
@@ -34,11 +55,16 @@ const Login = () => {
             name="email"
             defaultValue=""
             control={control}
-            rules={{ required: "Email is required" }}
             render={({ field }) => {
               return (
                 <InputWithLabel label="Email:">
                   <TextInput {...field} />
+                  {errors.email && (
+                    <p className="text-red-500">
+                      {typeof errors.email.message === "string" &&
+                        errors.email.message}
+                    </p>
+                  )}
                 </InputWithLabel>
               );
             }}
@@ -47,16 +73,36 @@ const Login = () => {
             name="password"
             defaultValue=""
             control={control}
-            rules={{ required: "Password is required" }}
             render={({ field }) => {
               return (
                 <InputWithLabel label="Password:">
-                  <TextInput {...field} />
+                  <TextInput {...field} type="password" />
+                  {errors.password && (
+                    <p className="text-red-500">
+                      {typeof errors.password.message === "string" &&
+                        errors.password.message}
+                    </p>
+                  )}
                 </InputWithLabel>
               );
             }}
           />
+
+          <DottedButton disabled={loading}>
+            {loading ? <LoadingSpinner /> : "Login"}
+          </DottedButton>
         </form>
+        <div className="text-indigo-500 mx-6">
+          <p>
+            Don't have an account?{" "}
+            <span
+              className="text-green cursor-pointer"
+              onClick={handleNavigateSignup}
+            >
+              Sign Up
+            </span>
+          </p>
+        </div>
       </div>
     </div>
   );
