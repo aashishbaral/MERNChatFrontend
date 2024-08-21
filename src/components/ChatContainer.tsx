@@ -4,6 +4,7 @@ import { IoLogOut, IoSearch, IoSend } from "react-icons/io5";
 import { MdOutlineMessage } from "react-icons/md";
 import { useAuth } from "../context/AuthContext";
 import useLogout from "../hooks/useLogout";
+import useMessageListen from "../hooks/useMessageListen";
 import {
   fetchConversationUsers,
   fetchMessages,
@@ -33,6 +34,7 @@ const ChatContainer = () => {
   const { logout, loading: logoutLoading } = useLogout();
   const dispatch = useAppDispatch();
 
+  useMessageListen();
   const {
     conversationUserStatus,
     conversationUsers,
