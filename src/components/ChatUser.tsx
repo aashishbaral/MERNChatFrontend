@@ -1,3 +1,4 @@
+import { useSocket } from "../context/SocketContext";
 import {
   ConversationUser,
   setSelectedConversation,
@@ -15,6 +16,10 @@ const ChatUser: React.FC<ChatUserProps> = ({ conversationUser }) => {
     (state) => state.conversation
   );
 
+  const { onlineUsers } = useSocket();
+
+  const isOnline = onlineUsers.includes(conversationUser._id);
+
   const isActive = selectedConversation?._id === conversationUser._id;
   return (
     <div
@@ -23,12 +28,15 @@ const ChatUser: React.FC<ChatUserProps> = ({ conversationUser }) => {
       }`}
       onClick={() => dispatch(setSelectedConversation(conversationUser))}
     >
-      <div className="w-1/4">
+      <div className="w-1/4 relative">
         <img
           src={profilePicture}
           className="object-cover h-10 w-14 rounded-full"
           alt={fullName}
         />
+        {isOnline && (
+          <div className="w-3 h-3 bg-green-500 rounded-full absolute top-0 right-0"></div>
+        )}
       </div>
       <div className="w-full">
         <div className="text-lg font-semibold text-gray-800">{fullName}</div>

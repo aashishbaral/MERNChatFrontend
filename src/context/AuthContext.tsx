@@ -19,8 +19,8 @@ interface AuthContextProps {
   setAuthUser: Dispatch<SetStateAction<string | null>>;
 }
 
-export const AuthContext = createContext<AuthContextProps | undefined>(
-  undefined
+export const AuthContext = createContext<AuthContextProps>(
+  {} as AuthContextProps
 );
 
 export const AuthContextProvider = ({
