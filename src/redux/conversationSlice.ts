@@ -10,6 +10,15 @@ export type Conversation = {
   messages: string[];
 };
 
+export type Message = {
+  _id: string;
+  message: string;
+  senderId: string;
+  receiverId: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export interface ConversationUser {
   _id: string;
   email: string;
@@ -22,7 +31,7 @@ export interface ConversationUser {
 interface ConversationState {
   conversations: Conversation[];
   selectedConversation: ConversationUser | null;
-  messages: string[];
+  messages: Message[];
   conversationStatus: Status;
   conversationUsers: ConversationUser[];
   conversationUserStatus: Status;
@@ -48,6 +57,7 @@ const conversationSlice = createSlice({
     },
     setSelectedConversation(state, action) {
       state.selectedConversation = action.payload;
+      state.messages = [];
     },
     setMessages(state, action) {
       state.messages = action.payload;

@@ -33,6 +33,5 @@ body {
 
 .custom-scrollbar {
   scrollbar-width: thin;
-  border-radius: 20px;
   scrollbar-color: indigo #f1f1f1;
 }

@@ -6,8 +6,16 @@ import React, {
   useState,
 } from "react";
 
+interface AuthUser {
+  _id: string;
+  fullName: string;
+  email: string;
+  username: string;
+  profilePicture: string;
+}
+
 interface AuthContextProps {
-  authUser: object | null;
+  authUser: AuthUser | null;
   setAuthUser: Dispatch<SetStateAction<string | null>>;
 }
 
